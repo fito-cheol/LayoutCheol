@@ -3,7 +3,7 @@
     <layout
       :draggable="true"
       :sortable="true"
-      :items="items"
+      :items="newItems"
       cellWidth=100
       cellHeight=100
       
@@ -30,6 +30,24 @@ export default {
         'a',
         'b',
         'c',
+      ],
+      newItems:[
+        {
+            content:'a',
+            size:1
+        },
+        {
+            content:'b',
+            size:1
+        },
+        {
+            content:'C',
+            size:2
+        },
+        {
+            content:'D',
+            size:1
+        }
       ]
     }
   }

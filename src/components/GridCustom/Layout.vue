@@ -3,10 +3,15 @@
     <GridItem v-for="v in list"
               :key="v.index"
               :index="v.index"
-              :sort="v.sort"
+              :sort="v.sort" 
+
+              :rowNumber="v.rowNumber"
+              :start="v.start"
+              :widthUnit="widthUnit"
+              
               :draggable="draggable"
               :drag-delay="dragDelay"
-              :row-count="rowCount"
+              :row-count="cellCountPerRow"
               :cell-width="cellWidth"
               :cell-height="cellHeight"
               :window-width="windowWidth"
@@ -14,7 +19,8 @@
               @dragstart="onDragStart"
               @dragend="onDragEnd"
               @drag="onDrag"
-              @click="click">
+              @click="click"
+              >
       <slot name="cell"
             :item="v.item"
             :index="v.index"
@@ -70,20 +76,32 @@ export default {
   },
   data () {
     return {
-      list: []
+      list: [],
     }
   },
   watch: {
     items: {
+      // 중첩된 data를 watch하는 법
+      // https://ui.toast.com/weekly-pick/ko_20190307/
       handler: function (nextItems = []) {
+        let accumulateWidth = 0;
+        
         this.list = nextItems.map((item, index) => {
+          const widthUnit = item.size
+          let {rowNumber, start, newAccumulateWidth} = this.calNextPosition(accumulateWidth, widthUnit)
+          accumulateWidth = newAccumulateWidth
+
           return {
-            item,
+            item:item.content,
             index: index,
-            sort: index
+            sort: index,
+            rowNumber,
+            start,
+            widthUnit
           }
         })
       },
+      // Will fire as soon as the component is created
       immediate: true
     }
   },
@@ -97,7 +115,7 @@ export default {
     },
 
     height () {
-      return Math.ceil(this.list.length / this.rowCount) *
+      return Math.ceil(this.list.length / this.cellCountPerRow) *
         this.cellHeight
     },
 
@@ -107,7 +125,7 @@ export default {
       }
     },
 
-    rowCount () {
+    cellCountPerRow () {
       return Math.floor(this.gridResponsiveWidth / this.cellWidth)
     },
 
@@ -125,6 +143,16 @@ export default {
     }
   },
   methods: {
+    calNextPosition(accumulateWidth=0, widthUnit=1){
+      let {cellCountPerRow} = this;
+      let rowNumber = Math.floor(accumulateWidth + widthUnit / cellCountPerRow);
+      let isOverFlow = Math.floor(accumulateWidth / cellCountPerRow) != Math.floor(accumulateWidth + widthUnit / cellCountPerRow);
+      let emptySpace = isOverFlow ? cellCountPerRow - (accumulateWidth % cellCountPerRow) : 0;
+
+      const startIndex = accumulateWidth + emptySpace
+      const newAccumulateWidth = accumulateWidth + emptySpace + widthUnit
+      return {rowNumber, start: startIndex, newAccumulateWidth, }
+    },
     /* Returns merged event object */
     wrapEvent (other = {}) {
       return {
@@ -183,7 +211,7 @@ export default {
 
       this.$emit('drag', this.wrapEvent({ event }))
     },
-
+    // TODO: 이거 이해하기
     sortList (itemIndex, gridPosition) {
       let targetItem = this.list.find(item => item.index === itemIndex)
       let targetItemSort = targetItem.sort
