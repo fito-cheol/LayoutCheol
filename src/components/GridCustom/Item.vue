@@ -17,7 +17,7 @@ export default {
     item:{
       type: String
     },
-    items:{
+    list:{
       type: Array
     },
     size:{
@@ -73,7 +73,7 @@ export default {
     this.$refs.self
       .addEventListener('transitionend', (event) => {
         if (!this.dragging) {
-          console.log(event)
+          event // event error 안내려고 장식용
           this.zIndex = 1
         }
       }, false)
@@ -91,13 +91,13 @@ export default {
       ]
     },
     style () {
-      let { zIndex, cellWidth, size, cellHeight, topStatic, leftStatic } = this
+      let { zIndex, cellWidth, size, cellHeight, top, left } = this
 
       return {
         zIndex,
         width: cellWidth * size + 'px',
         height: cellHeight + 'px',
-        transform: `translate3d(${leftStatic}px, ${topStatic}px, 0)`
+        transform: `translate3d(${left}px, ${top}px, 0)`
       }
     },
     newStyle(){
@@ -111,15 +111,14 @@ export default {
       }
     },
     
-    leftStatic(){
+    left(){
       let accumulSpace = 0
       // let current_row = 0
       let start_x = 0
-      let {rowCount, items, sort} = this
-      console.log('rowCount', rowCount, items, sort)
+      let {rowCount, list, sort} = this
       for (let i =0; i <= sort; i++){ //sort는 1부터 시작하니까 -1 해준다
         
-        let size = items[i].size
+        let size = list[i].size
         let rowNumber = Math.floor((accumulSpace + size - 1) / rowCount)
         let isOverFlow = Math.floor(accumulSpace / rowCount) != rowNumber;
         let emptySpace = isOverFlow ? rowCount - (accumulSpace % rowCount): 0;
@@ -129,24 +128,19 @@ export default {
         
         start_x = (accumulSpace + emptySpace) % rowCount 
         accumulSpace += addedSpace
-        if (sort==1){
-          // console.log(sort, size, rowNumber, isOverFlow, emptySpace, addedSpace)
-        }
-        
       }
-      // items에서 내 앞에 있는 cell 정보만 잘라내기
-      // 얼마나 앞 셀들이 공간을 차지 했는지 알아내기 rowCount 0이 아니라는 전제
-      console.log('accumulSpace', sort, start_x, accumulSpace)
-      return this.rowShift + start_x * this.cellWidth
+      return this.dragging
+        ? this.shiftX
+        : this.rowShift + start_x * this.cellWidth
     },
-    topStatic(){
+    top(){
       let accumulSpace = 0
       let current_row = 0
       // let start_x = 0
-      let {rowCount, items, sort} = this
+      let {rowCount, list, sort} = this
       for (let i =0; i <= sort; i++){ //sort는 1부터 시작하니까 -1 해준다
         
-        let size = items[i].size
+        let size = list[i].size
         let rowNumber = Math.floor((accumulSpace + size - 1) / rowCount)
         let isOverFlow = Math.floor(accumulSpace / rowCount) != rowNumber;
         let emptySpace = isOverFlow ? rowCount - (accumulSpace % rowCount): 0;
@@ -156,20 +150,11 @@ export default {
         // start_x = (accumulSpace + emptySpace) % rowCount 
         accumulSpace += addedSpace
       }
-      return current_row * this.cellHeight
-    },
-    left () {
-      
-      return this.dragging
-        ? this.shiftX
-        : this.rowShift + (this.sort % this.rowCount) * this.cellWidth
-    },
-
-    top () {
       return this.dragging
         ? this.shiftY
-        : Math.floor(this.sort / this.rowCount) * this.cellHeight
-    }
+        :current_row * this.cellHeight
+    },
+   
   },
   methods: {
     wrapEvent (event) {

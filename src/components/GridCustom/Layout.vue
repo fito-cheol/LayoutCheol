@@ -5,7 +5,7 @@
               :index="v.index"
               :size="v.size"
               :sort="v.sort"
-              :items="items"
+              :list="list"
               :draggable="draggable"
               :drag-delay="dragDelay"
               :row-count="rowCount"
@@ -182,12 +182,16 @@ export default {
     onDrag (event) {
       if (this.sortable) {
         this.sortList(event.index, event.gridPosition)
+        for (let i in this.list){
+          console.log(this.list[i].sort, this.list[i].size, this.items[this.list[i].sort].size)
+        }
       }
 
       this.$emit('drag', this.wrapEvent({ event }))
     },
-
+    //TODO: 얘 하는 일이 도대체 뭐야??
     sortList (itemIndex, gridPosition) {
+      console.log('sortList', itemIndex, gridPosition)
       let targetItem = this.list.find(item => item.index === itemIndex)
       let targetItemSort = targetItem.sort
 
@@ -201,12 +205,15 @@ export default {
       */
       gridPosition = Math.min(gridPosition, this.list.length - 1)
 
+      // sort 를 바꿔주는 역할을 한다
+      // 자신의 위치가 어디인지 확인하고
+      // 
       if (targetItemSort !== gridPosition) {
         this.list = this.list.map(item => {
           if (item.index === targetItem.index) {
             return {
               ...item,
-              sort: gridPosition
+              sort: gridPosition,
             }
           }
 
@@ -216,7 +223,7 @@ export default {
             if (sort <= targetItemSort && sort >= gridPosition) {
               return {
                 ...item,
-                sort: sort + 1
+                sort: sort + 1,
               }
             }
           }
@@ -225,7 +232,7 @@ export default {
             if (sort >= targetItemSort && sort <= gridPosition) {
               return {
                 ...item,
-                sort: sort - 1
+                sort: sort - 1,
               }
             }
           }
