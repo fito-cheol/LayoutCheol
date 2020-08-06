@@ -183,9 +183,10 @@ export default {
 
       gridX = Math.min(gridX, this.rowCount - 1)
       gridY = Math.max(gridY, 0)
-      // FIXME: 여기서 gridposition이 size가 고려가 안된다 size를 고려해서 할 수 있도록 하자
       
       let gridPosition = gridX + gridY * this.rowCount
+
+      console.log(this.shiftX / this.cellWidth, gridX, distanceX, this.shiftStartX, gridPosition)
 
       const $event = {
         event,

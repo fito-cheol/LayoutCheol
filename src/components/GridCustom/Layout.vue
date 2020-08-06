@@ -189,15 +189,11 @@ export default {
     },
     
     sortList (itemIndex, gridPosition) {
-      // console.log('sortList', itemIndex, gridPosition, this.list,)
       let targetItem = this.list.find(item => item.index === itemIndex)
       let targetItemSort = targetItem.sort
       let startPointList = this.getStartPointList()
-      // console.log(startPointList)
       let startPoint = startPointList[targetItemSort]
-
-
-      // gridPosition를 0과 list.length 사이에 위치시킨다
+      
       /*
         Normalizing new grid position
       */
@@ -213,7 +209,6 @@ export default {
       
       let isDragChangePosition =  startPoint !== gridPosition
       if (isDragChangePosition) {
-        console.log("-------", startPoint, gridPosition, targetItemSort)
         this.list = this.list.map(item => {
 
           if (item.index === targetItem.index) { 
@@ -225,29 +220,31 @@ export default {
                 }
             }
             for (let sort_index in startPointList){
-              // FIXME: 여기 조건이 마지막 sort문을 못넘김 
-              if (Number(sort_index) == startPointList.length -1 ){
-                new_sort = Number(sort_index)
+              sort_index = Number(sort_index)
+              // 마지막 인덱스가 넘어가면 제일 뒤
+              if (sort_index+1 == startPointList.length){
+                new_sort = sort_index;
                 break;
               }
-              if (startPointList[sort_index] <= gridPosition && gridPosition< startPointList[Number(sort_index)+1] ){
-                new_sort = Number(sort_index)
+              // 상자 크기 내에 있으면 바꿔줌
+              if (startPointList[sort_index] <= gridPosition && gridPosition < startPointList[sort_index+1]){
+                new_sort = sort_index;
                 break;
-              }      
+              }
             }
-            console.log("잘 나와야 하는데", new_sort)
             return {
                   ...item,
                   sort: new_sort,
                 }
           }
 
-          const { sort } = item
+          const { sort, size } = item
           let comparedStartPoint = startPointList[sort]
           
           let isDraggedLeft = gridPosition < startPoint 
           if (isDraggedLeft) { 
-            if (comparedStartPoint <= startPoint && comparedStartPoint >= gridPosition) {
+            // 사이즈가 2면 comparedStartPoint >= gridPosition 가 아니라 comparedStartPoint+1 >= gridPosition이 되어야한다
+            if (comparedStartPoint <= startPoint && comparedStartPoint + size -1 >= gridPosition) {
               console.log('+1 List', sort, comparedStartPoint, gridPosition, startPoint)
               
               return {
@@ -260,8 +257,6 @@ export default {
           if (isDraggedRight) {
             if (comparedStartPoint > startPoint && comparedStartPoint <= gridPosition) {
               console.log('-1 List', sort, comparedStartPoint, gridPosition, startPoint)
-              // FIXME: 여기 여러번 들어가기 때문에 해결해줘야함
-              // 문제1 startPoint가 안바뀜, 그게 문제
               return {
                 ...item,
                 sort: sort - 1,
