@@ -3,6 +3,7 @@
     <GridItem v-for="v in list"
               :key="v.index"
               :index="v.index"
+              :size="v.size"
               :sort="v.sort"
               :draggable="draggable"
               :drag-delay="dragDelay"
@@ -78,9 +79,10 @@ export default {
       handler: function (nextItems = []) {
         this.list = nextItems.map((item, index) => {
           return {
-            item,
+            item: item.content,
+            size: item.size,
             index: index,
-            sort: index
+            sort: index,
           }
         })
       },

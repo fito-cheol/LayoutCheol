@@ -14,6 +14,12 @@ const CLICK_PIXEL_DISTANCE = 4
 export default {
   name: 'GridItem',
   props: {
+    item:{
+      type: String
+    },
+    size:{
+      type: Number
+    },
     index: {
       type: Number
     },
@@ -82,11 +88,11 @@ export default {
       ]
     },
     style () {
-      let { zIndex, cellWidth, cellHeight, top, left } = this
+      let { zIndex, cellWidth, size, cellHeight, top, left } = this
 
       return {
         zIndex,
-        width: cellWidth + 'px',
+        width: cellWidth * size + 'px',
         height: cellHeight + 'px',
         transform: `translate3d(${left}px, ${top}px, 0)`
       }

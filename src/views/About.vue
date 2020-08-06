@@ -3,13 +3,12 @@
     <layout
       :draggable="true"
       :sortable="true"
-      :items="items"
-      cellWidth=100
-      cellHeight=100
-      
+      :items="newItems"
+      :cellWidth="width"
+      :cellHeight="height"
       >
       <template slot="cell" scope="props">
-          <button style="width:80px; height:80px">{{props.item}} - {{props.index}} / {{props.sort}} </button>
+          <button style="width:100%; height:100%">{{props.item}} - {{props.index}} / {{props.sort}} </button>
       </template>
     </layout>
   </div>
@@ -26,10 +25,15 @@ export default {
   },
   data () {
     return {
+      width:100,
+      height:100,
       items: [
         'a',
         'b',
         'c',
+      ],
+      newItems:[
+        {content:'a', size:1},{content:'b',size:2}
       ]
     }
   }
