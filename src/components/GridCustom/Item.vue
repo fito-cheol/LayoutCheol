@@ -17,6 +17,9 @@ export default {
     item:{
       type: String
     },
+    items:{
+      type: Array
+    },
     size:{
       type: Number
     },

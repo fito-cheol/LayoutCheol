@@ -5,6 +5,7 @@
               :index="v.index"
               :size="v.size"
               :sort="v.sort"
+              :items="items"
               :draggable="draggable"
               :drag-delay="dragDelay"
               :row-count="rowCount"
