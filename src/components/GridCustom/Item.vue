@@ -100,24 +100,12 @@ export default {
         transform: `translate3d(${left}px, ${top}px, 0)`
       }
     },
-    newStyle(){
-      let { zIndex, cellWidth, cellHeight, topStatic, leftStatic } = this
-      
-      return {
-        zIndex, // 기본 1
-        width: cellWidth + 'px', 
-        height: cellHeight + 'px',
-        transform: `translate3d(${leftStatic}px, ${topStatic}px, 0)` // 기본 좌표 
-      }
-    },
-    
     left(){
       let accumulSpace = 0
       // let current_row = 0
       let start_x = 0
       let {rowCount, list, sort} = this
-      for (let i =0; i <= sort; i++){ //sort는 1부터 시작하니까 -1 해준다
-        
+      for (let i =0; i <= sort && i < list.length; i++){ //sort는 1부터 시작하니까 -1 해준다
         let size = list[i].size
         let rowNumber = Math.floor((accumulSpace + size - 1) / rowCount)
         let isOverFlow = Math.floor(accumulSpace / rowCount) != rowNumber;
@@ -138,8 +126,7 @@ export default {
       let current_row = 0
       // let start_x = 0
       let {rowCount, list, sort} = this
-      for (let i =0; i <= sort; i++){ //sort는 1부터 시작하니까 -1 해준다
-        
+      for (let i =0; i <= sort && i < list.length; i++){ //sort는 1부터 시작하니까 -1 해준다
         let size = list[i].size
         let rowNumber = Math.floor((accumulSpace + size - 1) / rowCount)
         let isOverFlow = Math.floor(accumulSpace / rowCount) != rowNumber;

@@ -182,52 +182,86 @@ export default {
     onDrag (event) {
       if (this.sortable) {
         this.sortList(event.index, event.gridPosition)
-        for (let i in this.list){
-          console.log(this.list[i].sort, this.list[i].size, this.items[this.list[i].sort].size)
-        }
+        
       }
 
       this.$emit('drag', this.wrapEvent({ event }))
     },
-    //TODO: 얘 하는 일이 도대체 뭐야??
+    
     sortList (itemIndex, gridPosition) {
-      console.log('sortList', itemIndex, gridPosition, this.list)
+      // console.log('sortList', itemIndex, gridPosition, this.list,)
       let targetItem = this.list.find(item => item.index === itemIndex)
       let targetItemSort = targetItem.sort
+      let startPointList = this.getStartPointList()
+      // console.log(startPointList)
+      let startPoint = startPointList[targetItemSort]
 
+
+      // gridPosition를 0과 list.length 사이에 위치시킨다
       /*
         Normalizing new grid position
       */
-      gridPosition = Math.max(gridPosition, 0)
+      gridPosition = Math.max(gridPosition, -1)
       /*
         If you remove this line you can drag items to positions that
         are further than items array length
       */
-      gridPosition = Math.min(gridPosition, this.list.length - 1)
+      gridPosition = Math.min(gridPosition, startPointList[this.list.length - 1])
 
+      
       // sort 의 값만 바꿔준다
-      if (targetItemSort !== gridPosition) {
+      
+      let isDragChangePosition =  startPoint !== gridPosition
+      if (isDragChangePosition) {
+        console.log("-------", startPoint, gridPosition, targetItemSort)
         this.list = this.list.map(item => {
-          if (item.index === targetItem.index) {
-            return {
-              ...item,
-              sort: gridPosition,
+
+          if (item.index === targetItem.index) { 
+            let new_sort = 0
+            if (gridPosition== -1){
+              return {
+                  ...item,
+                  sort: new_sort,
+                }
             }
+            for (let sort_index in startPointList){
+              // FIXME: 여기 조건이 마지막 sort문을 못넘김 
+              if (Number(sort_index) == startPointList.length -1 ){
+                new_sort = Number(sort_index)
+                break;
+              }
+              if (startPointList[sort_index] <= gridPosition && gridPosition< startPointList[Number(sort_index)+1] ){
+                new_sort = Number(sort_index)
+                break;
+              }      
+            }
+            console.log("잘 나와야 하는데", new_sort)
+            return {
+                  ...item,
+                  sort: new_sort,
+                }
           }
 
           const { sort } = item
-
-          if (targetItemSort > gridPosition) {
-            if (sort <= targetItemSort && sort >= gridPosition) {
+          let comparedStartPoint = startPointList[sort]
+          
+          let isDraggedLeft = gridPosition < startPoint 
+          if (isDraggedLeft) { 
+            if (comparedStartPoint <= startPoint && comparedStartPoint >= gridPosition) {
+              console.log('+1 List', sort, comparedStartPoint, gridPosition, startPoint)
+              
               return {
                 ...item,
                 sort: sort + 1,
               }
             }
           }
-
-          if (targetItemSort < gridPosition) {
-            if (sort >= targetItemSort && sort <= gridPosition) {
+          let isDraggedRight = gridPosition > startPoint  
+          if (isDraggedRight) {
+            if (comparedStartPoint > startPoint && comparedStartPoint <= gridPosition) {
+              console.log('-1 List', sort, comparedStartPoint, gridPosition, startPoint)
+              // FIXME: 여기 여러번 들어가기 때문에 해결해줘야함
+              // 문제1 startPoint가 안바뀜, 그게 문제
               return {
                 ...item,
                 sort: sort - 1,
@@ -242,9 +276,28 @@ export default {
       }
       // sort 순서대로 다시 정렬을 해줘야한다
       this.list.sort(function(a,b){
-        return a.sort > b.sort ? 1: -1
+        return Number(a.sort) > Number(b.sort) ? 1: -1
       })
 
+    },
+    getStartPointList(){
+      let accumulationList = []
+      let centerPointList = []
+      let accumulSpace = 0
+      let {rowCount, list} = this
+      for (let i =0; i < list.length; i++){ //sort는 1부터 시작하니까 -1 해준다
+        
+        let size = list[i].size
+        let rowNumber = Math.floor((accumulSpace + size - 1) / rowCount)
+        let isOverFlow = Math.floor(accumulSpace / rowCount) != rowNumber;
+        let emptySpace = isOverFlow ? rowCount - (accumulSpace % rowCount): 0;
+        let addedSpace = emptySpace + size
+
+        accumulationList.push(accumulSpace)
+        centerPointList.push(Number(accumulSpace+size/2))
+        accumulSpace += addedSpace
+      }
+      return accumulationList
     }
   }
 }

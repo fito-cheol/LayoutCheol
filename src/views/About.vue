@@ -34,8 +34,8 @@ export default {
       ],
       newItems:[
         {content:'a', size:1},{content:'b',size:2},
-        {content:'c',size:3},{content:'d',size:5},
-        {content:'e',size:5},
+        {content:'c',size:2},{content:'d',size:1},
+        {content:'e',size:1},
       ]
     }
   }
