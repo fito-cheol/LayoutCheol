@@ -191,7 +191,7 @@ export default {
     },
     //TODO: 얘 하는 일이 도대체 뭐야??
     sortList (itemIndex, gridPosition) {
-      console.log('sortList', itemIndex, gridPosition)
+      console.log('sortList', itemIndex, gridPosition, this.list)
       let targetItem = this.list.find(item => item.index === itemIndex)
       let targetItemSort = targetItem.sort
 
@@ -205,9 +205,7 @@ export default {
       */
       gridPosition = Math.min(gridPosition, this.list.length - 1)
 
-      // sort 를 바꿔주는 역할을 한다
-      // 자신의 위치가 어디인지 확인하고
-      // 
+      // sort 의 값만 바꿔준다
       if (targetItemSort !== gridPosition) {
         this.list = this.list.map(item => {
           if (item.index === targetItem.index) {
@@ -242,6 +240,11 @@ export default {
 
         this.$emit('sort', this.wrapEvent())
       }
+      // sort 순서대로 다시 정렬을 해줘야한다
+      this.list.sort(function(a,b){
+        return a.sort > b.sort ? 1: -1
+      })
+
     }
   }
 }
