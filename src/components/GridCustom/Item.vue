@@ -101,43 +101,13 @@ export default {
       }
     },
     left(){
-      let position = 0
-      // let currentRow = 0
-      let startPosition = 0
-      let {cellCountPerRow, list, sort} = this
-      for (let i =0; i <= sort && i < list.length; i++){ //sort는 1부터 시작하니까 -1 해준다
-        let size = list[i].size
-        let startCellRowNumber = Math.floor(position / cellCountPerRow)
-        let endCellRowNumber = Math.floor((position + size - 1) / cellCountPerRow)
-        let isCellExceedRow = startCellRowNumber != endCellRowNumber;
-        let emptySpace = isCellExceedRow ? cellCountPerRow - (position % cellCountPerRow): 0;
-        let addedCellSize = emptySpace + size
-
-        // currentRow = endCellRowNumber
-        startPosition = (position + emptySpace) % cellCountPerRow 
-        position += addedCellSize
-      }
+      let {startPosition} = this.calPosition()
       return this.dragging
         ? this.shiftX
         : this.rowShift + startPosition * this.cellWidth
     },
     top(){
-      let position = 0
-      let currentRow = 0
-      // let startPosition = 0
-      let {cellCountPerRow, list, sort} = this
-      for (let i =0; i <= sort && i < list.length; i++){ //sort는 1부터 시작하니까 -1 해준다
-        let size = list[i].size
-        let startCellRowNumber = Math.floor(position / cellCountPerRow)
-        let endCellRowNumber = Math.floor((position + size - 1) / cellCountPerRow)
-        let isCellExceedRow = startCellRowNumber != endCellRowNumber;
-        let emptySpace = isCellExceedRow ? cellCountPerRow - (position % cellCountPerRow): 0;
-        let addedCellSize = emptySpace + size
-
-        currentRow = endCellRowNumber
-        // startPosition = (position + emptySpace) % cellCountPerRow 
-        position += addedCellSize
-      }
+      let {currentRow} = this.calPosition()
       return this.dragging
         ? this.shiftY
         :currentRow * this.cellHeight
@@ -149,7 +119,25 @@ export default {
       let { index, sort } = this
       return { event, index, sort }
     },
+    calPosition(){
+      let position = 0
+      let currentRow = 0
+      let startPosition = 0
+      let {cellCountPerRow, list, sort} = this
+      for (let i =0; i <= sort && i < list.length; i++){ //sort는 1부터 시작하니까 -1 해준다
+        let size = list[i].size
+        let startCellRowNumber = Math.floor(position / cellCountPerRow)
+        let endCellRowNumber = Math.floor((position + size - 1) / cellCountPerRow)
+        let isCellExceedRow = startCellRowNumber != endCellRowNumber;
+        let emptySpace = isCellExceedRow ? cellCountPerRow - (position % cellCountPerRow): 0;
+        let addedCellSize = emptySpace + size
 
+        currentRow = endCellRowNumber
+        startPosition = (position + emptySpace) % cellCountPerRow 
+        position += addedCellSize
+      }
+      return {currentRow, startPosition}
+    },
     dragStart (event) {
       let e = event.touches ? event.touches[0] : event
 
