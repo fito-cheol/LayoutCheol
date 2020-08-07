@@ -8,7 +8,8 @@
       :cellHeight="height"
       >
       <template slot="cell" scope="props">
-          <button style="width:100%; height:100%">{{props.item}} - {{props.index}} / {{props.sort}} </button>
+        <!-- https://stackoverflow.com/questions/41748934/how-to-create-dynamic-tag-based-on-props-with-vue-2 -->        
+        <button style="width:100%; height:100%">{{props.item}} - {{props.index}} / {{props.sort}} </button>
       </template>
     </layout>
   </div>
