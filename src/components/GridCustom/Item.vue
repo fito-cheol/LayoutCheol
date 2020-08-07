@@ -184,7 +184,7 @@ export default {
       gridX = Math.min(gridX, this.cellCountPerRow - 1)
       gridY = Math.max(gridY, 0)
       
-      let gridPosition = gridX + gridY * this.cellCountPerRow
+      let position = gridX + gridY * this.cellCountPerRow
 
       const $event = {
         event,
@@ -195,7 +195,7 @@ export default {
         index: this.index,
         gridX,
         gridY,
-        gridPosition
+        position
       }
 
       this.$emit('drag', $event)
