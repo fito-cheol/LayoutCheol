@@ -114,7 +114,9 @@ export default {
       return Math.floor(this.gridResponsiveWidth / this.cellWidth)
     },
 
-    rowShift () {
+    // 중앙 정렬시 x방향으로 얼만큼 이동하는지 (단위 px일듯) 
+    // padding의 개념이라 보면 될듯 왜 style에 넣을 수도 있음
+    rowShift () { 
       if (this.centerAlign) {
         let contentWidth = this.list.length * this.cellWidth
         let rowShift = contentWidth < this.gridResponsiveWidth
