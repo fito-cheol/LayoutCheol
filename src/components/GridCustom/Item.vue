@@ -186,8 +186,6 @@ export default {
       
       let gridPosition = gridX + gridY * this.rowCount
 
-      console.log(this.shiftX / this.cellWidth, gridX, distanceX, this.shiftStartX, gridPosition)
-
       const $event = {
         event,
         distanceX,

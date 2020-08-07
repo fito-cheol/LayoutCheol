@@ -245,7 +245,6 @@ export default {
           if (isDraggedLeft) { 
             // 사이즈가 2면 comparedStartPoint >= gridPosition 가 아니라 comparedStartPoint+1 >= gridPosition이 되어야한다
             if (comparedStartPoint <= startPoint && comparedStartPoint + size -1 >= gridPosition) {
-              console.log('+1 List', sort, comparedStartPoint, gridPosition, startPoint)
               
               return {
                 ...item,
@@ -256,7 +255,6 @@ export default {
           let isDraggedRight = gridPosition > startPoint  
           if (isDraggedRight) {
             if (comparedStartPoint > startPoint && comparedStartPoint <= gridPosition) {
-              console.log('-1 List', sort, comparedStartPoint, gridPosition, startPoint)
               return {
                 ...item,
                 sort: sort - 1,
