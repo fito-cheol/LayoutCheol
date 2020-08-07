@@ -196,11 +196,11 @@ export default {
       
       dragPosition = this.nomalizePosition(dragPosition, startPositionList)
       
-      // sort 의 값만 바꿔준다
+      // 드래그 결과에 따라서 sort 값을 바꿔준다
       let isDragChangePosition =  startPosition !== dragPosition
       if (isDragChangePosition) {
         this.list = this.list.map(item => {
-
+          
           const isDraggedItem = item.index === targetItem.index
           if (isDraggedItem) { 
             let new_sort = 0
@@ -265,7 +265,6 @@ export default {
         this.$emit('sort', this.wrapEvent())
       }
       // sort 순서대로 다시 정렬을 해줘야 위치 계산에서 오류가 안생긴다 
-      // ex) getStartPositionList
       this.list.sort(function(a,b){
         return Number(a.sort) > Number(b.sort) ? 1: -1
       })
