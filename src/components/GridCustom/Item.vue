@@ -102,20 +102,20 @@ export default {
     },
     left(){
       let accumulSpace = 0
-      // let current_row = 0
+      // let currentRow = 0
       let start_x = 0
       let {cellCountPerRow, list, sort} = this
       for (let i =0; i <= sort && i < list.length; i++){ //sort는 1부터 시작하니까 -1 해준다
         let size = list[i].size
-        let rowNumber = Math.floor((accumulSpace + size - 1) / cellCountPerRow)
-        let isOverFlow = Math.floor(accumulSpace / cellCountPerRow) != rowNumber;
-        let emptySpace = isOverFlow ? cellCountPerRow - (accumulSpace % cellCountPerRow): 0;
-        let addedSpace = emptySpace + size
+        let startCellRowNumber = Math.floor(accumulSpace / cellCountPerRow)
+        let endCellRowNumber = Math.floor((accumulSpace + size - 1) / cellCountPerRow)
+        let isCellExceedRow = startCellRowNumber != endCellRowNumber;
+        let emptySpace = isCellExceedRow ? cellCountPerRow - (accumulSpace % cellCountPerRow): 0;
+        let addedCellSize = emptySpace + size
 
-        // current_row = rowNumber
-        
+        // currentRow = endCellRowNumber
         start_x = (accumulSpace + emptySpace) % cellCountPerRow 
-        accumulSpace += addedSpace
+        accumulSpace += addedCellSize
       }
       return this.dragging
         ? this.shiftX
@@ -123,23 +123,24 @@ export default {
     },
     top(){
       let accumulSpace = 0
-      let current_row = 0
+      let currentRow = 0
       // let start_x = 0
       let {cellCountPerRow, list, sort} = this
       for (let i =0; i <= sort && i < list.length; i++){ //sort는 1부터 시작하니까 -1 해준다
         let size = list[i].size
-        let rowNumber = Math.floor((accumulSpace + size - 1) / cellCountPerRow)
-        let isOverFlow = Math.floor(accumulSpace / cellCountPerRow) != rowNumber;
-        let emptySpace = isOverFlow ? cellCountPerRow - (accumulSpace % cellCountPerRow): 0;
-        let addedSpace = emptySpace + size
+        let startCellRowNumber = Math.floor(accumulSpace / cellCountPerRow)
+        let endCellRowNumber = Math.floor((accumulSpace + size - 1) / cellCountPerRow)
+        let isCellExceedRow = startCellRowNumber != endCellRowNumber;
+        let emptySpace = isCellExceedRow ? cellCountPerRow - (accumulSpace % cellCountPerRow): 0;
+        let addedCellSize = emptySpace + size
 
-        current_row = rowNumber
+        currentRow = endCellRowNumber
         // start_x = (accumulSpace + emptySpace) % cellCountPerRow 
-        accumulSpace += addedSpace
+        accumulSpace += addedCellSize
       }
       return this.dragging
         ? this.shiftY
-        :current_row * this.cellHeight
+        :currentRow * this.cellHeight
     },
    
   },
