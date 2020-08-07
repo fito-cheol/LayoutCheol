@@ -35,7 +35,7 @@ export default {
     cellHeight: {
       type: Number
     },
-    rowCount: {
+    cellCountPerRow: {
       type: Number
     },
     rowShift: {
@@ -104,17 +104,17 @@ export default {
       let accumulSpace = 0
       // let current_row = 0
       let start_x = 0
-      let {rowCount, list, sort} = this
+      let {cellCountPerRow, list, sort} = this
       for (let i =0; i <= sort && i < list.length; i++){ //sort는 1부터 시작하니까 -1 해준다
         let size = list[i].size
-        let rowNumber = Math.floor((accumulSpace + size - 1) / rowCount)
-        let isOverFlow = Math.floor(accumulSpace / rowCount) != rowNumber;
-        let emptySpace = isOverFlow ? rowCount - (accumulSpace % rowCount): 0;
+        let rowNumber = Math.floor((accumulSpace + size - 1) / cellCountPerRow)
+        let isOverFlow = Math.floor(accumulSpace / cellCountPerRow) != rowNumber;
+        let emptySpace = isOverFlow ? cellCountPerRow - (accumulSpace % cellCountPerRow): 0;
         let addedSpace = emptySpace + size
 
         // current_row = rowNumber
         
-        start_x = (accumulSpace + emptySpace) % rowCount 
+        start_x = (accumulSpace + emptySpace) % cellCountPerRow 
         accumulSpace += addedSpace
       }
       return this.dragging
@@ -125,16 +125,16 @@ export default {
       let accumulSpace = 0
       let current_row = 0
       // let start_x = 0
-      let {rowCount, list, sort} = this
+      let {cellCountPerRow, list, sort} = this
       for (let i =0; i <= sort && i < list.length; i++){ //sort는 1부터 시작하니까 -1 해준다
         let size = list[i].size
-        let rowNumber = Math.floor((accumulSpace + size - 1) / rowCount)
-        let isOverFlow = Math.floor(accumulSpace / rowCount) != rowNumber;
-        let emptySpace = isOverFlow ? rowCount - (accumulSpace % rowCount): 0;
+        let rowNumber = Math.floor((accumulSpace + size - 1) / cellCountPerRow)
+        let isOverFlow = Math.floor(accumulSpace / cellCountPerRow) != rowNumber;
+        let emptySpace = isOverFlow ? cellCountPerRow - (accumulSpace % cellCountPerRow): 0;
         let addedSpace = emptySpace + size
 
         current_row = rowNumber
-        // start_x = (accumulSpace + emptySpace) % rowCount 
+        // start_x = (accumulSpace + emptySpace) % cellCountPerRow 
         accumulSpace += addedSpace
       }
       return this.dragging
@@ -181,10 +181,10 @@ export default {
       let gridX = Math.round(this.shiftX / this.cellWidth)
       let gridY = Math.round(this.shiftY / this.cellHeight)
 
-      gridX = Math.min(gridX, this.rowCount - 1)
+      gridX = Math.min(gridX, this.cellCountPerRow - 1)
       gridY = Math.max(gridY, 0)
       
-      let gridPosition = gridX + gridY * this.rowCount
+      let gridPosition = gridX + gridY * this.cellCountPerRow
 
       const $event = {
         event,

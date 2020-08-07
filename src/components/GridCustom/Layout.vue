@@ -8,7 +8,7 @@
               :list="list"
               :draggable="draggable"
               :drag-delay="dragDelay"
-              :row-count="rowCount"
+              :cellCountPerRow="cellCountPerRow"
               :cell-width="cellWidth"
               :cell-height="cellHeight"
               :window-width="windowWidth"
@@ -100,7 +100,7 @@ export default {
     },
 
     height () {
-      return Math.ceil(this.list.length / this.rowCount) *
+      return Math.ceil(this.list.length / this.cellCountPerRow) *
         this.cellHeight
     },
 
@@ -110,7 +110,7 @@ export default {
       }
     },
 
-    rowCount () {
+    cellCountPerRow () {
       return Math.floor(this.gridResponsiveWidth / this.cellWidth)
     },
 
@@ -277,13 +277,13 @@ export default {
       let accumulationList = []
       let centerPointList = []
       let accumulSpace = 0
-      let {rowCount, list} = this
+      let {cellCountPerRow, list} = this
       for (let i =0; i < list.length; i++){ //sort는 1부터 시작하니까 -1 해준다
         
         let size = list[i].size
-        let rowNumber = Math.floor((accumulSpace + size - 1) / rowCount)
-        let isOverFlow = Math.floor(accumulSpace / rowCount) != rowNumber;
-        let emptySpace = isOverFlow ? rowCount - (accumulSpace % rowCount): 0;
+        let rowNumber = Math.floor((accumulSpace + size - 1) / cellCountPerRow)
+        let isOverFlow = Math.floor(accumulSpace / cellCountPerRow) != rowNumber;
+        let emptySpace = isOverFlow ? cellCountPerRow - (accumulSpace % cellCountPerRow): 0;
         let addedSpace = emptySpace + size
 
         accumulationList.push(accumulSpace)
