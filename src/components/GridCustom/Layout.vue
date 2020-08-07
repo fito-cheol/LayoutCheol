@@ -3,15 +3,12 @@
     <GridItem v-for="v in list"
               :key="v.index"
               :index="v.index"
-              :sort="v.sort" 
-
-              :rowNumber="v.rowNumber"
-              :start="v.start"
-              :widthUnit="widthUnit"
-              
+              :size="v.size"
+              :sort="v.sort"
+              :list="list"
               :draggable="draggable"
               :drag-delay="dragDelay"
-              :row-count="cellCountPerRow"
+              :row-count="rowCount"
               :cell-width="cellWidth"
               :cell-height="cellHeight"
               :window-width="windowWidth"
@@ -19,8 +16,7 @@
               @dragstart="onDragStart"
               @dragend="onDragEnd"
               @drag="onDrag"
-              @click="click"
-              >
+              @click="click">
       <slot name="cell"
             :item="v.item"
             :index="v.index"
@@ -76,32 +72,21 @@ export default {
   },
   data () {
     return {
-      list: [],
+      list: []
     }
   },
   watch: {
     items: {
-      // 중첩된 data를 watch하는 법
-      // https://ui.toast.com/weekly-pick/ko_20190307/
       handler: function (nextItems = []) {
-        let accumulateWidth = 0;
-        
         this.list = nextItems.map((item, index) => {
-          const widthUnit = item.size
-          let {rowNumber, start, newAccumulateWidth} = this.calNextPosition(accumulateWidth, widthUnit)
-          accumulateWidth = newAccumulateWidth
-
           return {
-            item:item.content,
+            item: item.content,
+            size: item.size,
             index: index,
             sort: index,
-            rowNumber,
-            start,
-            widthUnit
           }
         })
       },
-      // Will fire as soon as the component is created
       immediate: true
     }
   },
@@ -115,7 +100,7 @@ export default {
     },
 
     height () {
-      return Math.ceil(this.list.length / this.cellCountPerRow) *
+      return Math.ceil(this.list.length / this.rowCount) *
         this.cellHeight
     },
 
@@ -125,7 +110,7 @@ export default {
       }
     },
 
-    cellCountPerRow () {
+    rowCount () {
       return Math.floor(this.gridResponsiveWidth / this.cellWidth)
     },
 
@@ -143,16 +128,6 @@ export default {
     }
   },
   methods: {
-    calNextPosition(accumulateWidth=0, widthUnit=1){
-      let {cellCountPerRow} = this;
-      let rowNumber = Math.floor(accumulateWidth + widthUnit / cellCountPerRow);
-      let isOverFlow = Math.floor(accumulateWidth / cellCountPerRow) != Math.floor(accumulateWidth + widthUnit / cellCountPerRow);
-      let emptySpace = isOverFlow ? cellCountPerRow - (accumulateWidth % cellCountPerRow) : 0;
-
-      const startIndex = accumulateWidth + emptySpace
-      const newAccumulateWidth = accumulateWidth + emptySpace + widthUnit
-      return {rowNumber, start: startIndex, newAccumulateWidth, }
-    },
     /* Returns merged event object */
     wrapEvent (other = {}) {
       return {
@@ -207,50 +182,84 @@ export default {
     onDrag (event) {
       if (this.sortable) {
         this.sortList(event.index, event.gridPosition)
+        
       }
 
       this.$emit('drag', this.wrapEvent({ event }))
     },
-    // TODO: 이거 이해하기
+    
     sortList (itemIndex, gridPosition) {
       let targetItem = this.list.find(item => item.index === itemIndex)
       let targetItemSort = targetItem.sort
-
+      let startPointList = this.getStartPointList()
+      let startPoint = startPointList[targetItemSort]
+      
       /*
         Normalizing new grid position
       */
-      gridPosition = Math.max(gridPosition, 0)
+      gridPosition = Math.max(gridPosition, -1)
       /*
         If you remove this line you can drag items to positions that
         are further than items array length
       */
-      gridPosition = Math.min(gridPosition, this.list.length - 1)
+      gridPosition = Math.min(gridPosition, startPointList[this.list.length - 1])
 
-      if (targetItemSort !== gridPosition) {
+      
+      // sort 의 값만 바꿔준다
+      
+      let isDragChangePosition =  startPoint !== gridPosition
+      if (isDragChangePosition) {
         this.list = this.list.map(item => {
-          if (item.index === targetItem.index) {
-            return {
-              ...item,
-              sort: gridPosition
+
+          if (item.index === targetItem.index) { 
+            let new_sort = 0
+            if (gridPosition== -1){
+              return {
+                  ...item,
+                  sort: new_sort,
+                }
             }
+            for (let sort_index in startPointList){
+              sort_index = Number(sort_index)
+              // 마지막 인덱스가 넘어가면 제일 뒤
+              if (sort_index+1 == startPointList.length){
+                new_sort = sort_index;
+                break;
+              }
+              // 상자 크기 내에 있으면 바꿔줌
+              if (startPointList[sort_index] <= gridPosition && gridPosition < startPointList[sort_index+1]){
+                new_sort = sort_index;
+                break;
+              }
+            }
+            return {
+                  ...item,
+                  sort: new_sort,
+                }
           }
 
-          const { sort } = item
-
-          if (targetItemSort > gridPosition) {
-            if (sort <= targetItemSort && sort >= gridPosition) {
+          const { sort, size } = item
+          let comparedStartPoint = startPointList[sort]
+          
+          let isDraggedLeft = gridPosition < startPoint 
+          if (isDraggedLeft) { 
+            // 사이즈가 2면 comparedStartPoint >= gridPosition 가 아니라 comparedStartPoint+1 >= gridPosition이 되어야한다
+            if (comparedStartPoint <= startPoint && comparedStartPoint + size -1 >= gridPosition) {
+              console.log('+1 List', sort, comparedStartPoint, gridPosition, startPoint)
+              
               return {
                 ...item,
-                sort: sort + 1
+                sort: sort + 1,
               }
             }
           }
-
-          if (targetItemSort < gridPosition) {
-            if (sort >= targetItemSort && sort <= gridPosition) {
+          let isDraggedRight = gridPosition > startPoint  
+          if (isDraggedRight) {
+            if (comparedStartPoint > startPoint && comparedStartPoint <= gridPosition) {
+              console.log('-1 List', sort, comparedStartPoint, gridPosition, startPoint)
               return {
                 ...item,
-                sort: sort - 1
+                sort: sort - 1,
               }
             }
           }
@@ -260,6 +269,30 @@ export default {
 
         this.$emit('sort', this.wrapEvent())
       }
+      // sort 순서대로 다시 정렬을 해줘야한다
+      this.list.sort(function(a,b){
+        return Number(a.sort) > Number(b.sort) ? 1: -1
+      })
+
+    },
+    getStartPointList(){
+      let accumulationList = []
+      let centerPointList = []
+      let accumulSpace = 0
+      let {rowCount, list} = this
+      for (let i =0; i < list.length; i++){ //sort는 1부터 시작하니까 -1 해준다
+        
+        let size = list[i].size
+        let rowNumber = Math.floor((accumulSpace + size - 1) / rowCount)
+        let isOverFlow = Math.floor(accumulSpace / rowCount) != rowNumber;
+        let emptySpace = isOverFlow ? rowCount - (accumulSpace % rowCount): 0;
+        let addedSpace = emptySpace + size
+
+        accumulationList.push(accumulSpace)
+        centerPointList.push(Number(accumulSpace+size/2))
+        accumulSpace += addedSpace
+      }
+      return accumulationList
     }
   }
 }

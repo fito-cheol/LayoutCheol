@@ -14,6 +14,15 @@ const CLICK_PIXEL_DISTANCE = 4
 export default {
   name: 'GridItem',
   props: {
+    item:{
+      type: String
+    },
+    list:{
+      type: Array
+    },
+    size:{
+      type: Number
+    },
     index: {
       type: Number
     },
@@ -26,7 +35,7 @@ export default {
     cellHeight: {
       type: Number
     },
-    cellCountPerRow: {
+    rowCount: {
       type: Number
     },
     rowShift: {
@@ -36,8 +45,6 @@ export default {
     draggable: {
       type: Boolean
     },
-    // 단위 ms : 왼클릭을 얼마나 눌려야 dragEvent가 발생하는지 측정
-    // 실수를 방지하기 위해서 100ms를 주던지 0을 주던지 별로 필요없는 옵션
     dragDelay: {
       type: Number,
       default: 0
@@ -63,11 +70,10 @@ export default {
     }
   },
   mounted () {
-    // TODO: transitioned라는 event가 던제 발생하는지 알아보기
     this.$refs.self
       .addEventListener('transitionend', (event) => {
         if (!this.dragging) {
-          console.log(event)
+          event // event error 안내려고 장식용
           this.zIndex = 1
         }
       }, false)
@@ -85,27 +91,57 @@ export default {
       ]
     },
     style () {
-      let { zIndex, cellWidth, cellHeight, top, left } = this
+      let { zIndex, cellWidth, size, cellHeight, top, left } = this
 
       return {
-        zIndex, // 기본 1
-        width: cellWidth + 'px', 
+        zIndex,
+        width: cellWidth * size + 'px',
         height: cellHeight + 'px',
-        transform: `translate3d(${left}px, ${top}px, 0)` // 기본 좌표 
+        transform: `translate3d(${left}px, ${top}px, 0)`
       }
     },
-    // sort cellCountPerRow cellWidth cellHeight 
-    left () {
-      return this.dragging
-        ? this.shiftX // 드래그시
-        : this.rowShift + (this.sort % this.cellCountPerRow) * this.cellWidth // 기본 세팅
-    },
+    left(){
+      let accumulSpace = 0
+      // let current_row = 0
+      let start_x = 0
+      let {rowCount, list, sort} = this
+      for (let i =0; i <= sort && i < list.length; i++){ //sort는 1부터 시작하니까 -1 해준다
+        let size = list[i].size
+        let rowNumber = Math.floor((accumulSpace + size - 1) / rowCount)
+        let isOverFlow = Math.floor(accumulSpace / rowCount) != rowNumber;
+        let emptySpace = isOverFlow ? rowCount - (accumulSpace % rowCount): 0;
+        let addedSpace = emptySpace + size
 
-    top () {
+        // current_row = rowNumber
+        
+        start_x = (accumulSpace + emptySpace) % rowCount 
+        accumulSpace += addedSpace
+      }
       return this.dragging
-        ? this.shiftY // 드래그시
-        : Math.floor(this.sort / this.cellCountPerRow) * this.cellHeight // 기본 세팅
-    }
+        ? this.shiftX
+        : this.rowShift + start_x * this.cellWidth
+    },
+    top(){
+      let accumulSpace = 0
+      let current_row = 0
+      // let start_x = 0
+      let {rowCount, list, sort} = this
+      for (let i =0; i <= sort && i < list.length; i++){ //sort는 1부터 시작하니까 -1 해준다
+        let size = list[i].size
+        let rowNumber = Math.floor((accumulSpace + size - 1) / rowCount)
+        let isOverFlow = Math.floor(accumulSpace / rowCount) != rowNumber;
+        let emptySpace = isOverFlow ? rowCount - (accumulSpace % rowCount): 0;
+        let addedSpace = emptySpace + size
+
+        current_row = rowNumber
+        // start_x = (accumulSpace + emptySpace) % rowCount 
+        accumulSpace += addedSpace
+      }
+      return this.dragging
+        ? this.shiftY
+        :current_row * this.cellHeight
+    },
+   
   },
   methods: {
     wrapEvent (event) {
@@ -114,21 +150,19 @@ export default {
     },
 
     dragStart (event) {
-      // drag 시작할 때 기본값 세팅
       let e = event.touches ? event.touches[0] : event
 
       this.zIndex = 2
-      // TODO: this.left와 top은 computed에서 나왔음 나중에 확인해볼 것
+
       this.shiftX = this.shiftStartX = this.left
       this.shiftY = this.shiftStartY = this.top
-      // TODO: e.pageX와 this.left가 차이가 나는지 궁금
+
       this.mouseMoveStartX = e.pageX
       this.mouseMoveStartY = e.pageY
 
       this.animate = false
       this.dragging = true
 
-      // 나중에 드래그 끝날 때 없애주는 이벤트 등록
       document.addEventListener('mousemove', this.documentMouseMove)
       document.addEventListener('touchmove', this.documentMouseMove)
 
@@ -138,22 +172,21 @@ export default {
     drag (event) {
       let e = event.touches ? event.touches[0] : event
 
-      let distanceX = e.pageX - this.mouseMoveStartX // 드래그에서 얼마나 벗어났나
-      let distanceY = e.pageY - this.mouseMoveStartY 
+      let distanceX = e.pageX - this.mouseMoveStartX
+      let distanceY = e.pageY - this.mouseMoveStartY
 
-      this.shiftX = distanceX + this.shiftStartX // 화면 좌측 상단에서 얼마나 옮겨야하는지
+      this.shiftX = distanceX + this.shiftStartX
       this.shiftY = distanceY + this.shiftStartY
 
-      let gridX = Math.round(this.shiftX / this.cellWidth) // 정수형 좌표
+      let gridX = Math.round(this.shiftX / this.cellWidth)
       let gridY = Math.round(this.shiftY / this.cellHeight)
 
-      // TODO: cellCountPerRow가 아니라 colCount라고 이름을 바꿔야 될거 같음
-      //      근데 cellCountPerRow를 gridY에다가 곱하는게 말이 되는데 뭘까
-      gridX = Math.min(gridX, this.cellCountPerRow - 1)
+      gridX = Math.min(gridX, this.rowCount - 1)
       gridY = Math.max(gridY, 0)
+      
+      let gridPosition = gridX + gridY * this.rowCount
 
-      // gridPositiond은 Layout.vue의 sortList라는 method에서 쓰임
-      let gridPosition = gridX + gridY * this.cellCountPerRow
+      console.log(this.shiftX / this.cellWidth, gridX, distanceX, this.shiftStartX, gridPosition)
 
       const $event = {
         event,
@@ -238,7 +271,6 @@ export default {
   z-index: 1;
 }
 
-// transition 참고 https://thoughtbot.com/blog/transitions-and-transforms#:~:text=Transitions%20are%20the%20grease%20in,making%20it%20smooth%20and%20gradual.
 .v-grid-item-animate {
   transition: transform 800ms ease;
 }
