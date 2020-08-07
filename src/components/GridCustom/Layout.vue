@@ -65,7 +65,7 @@ export default {
        type: Boolean,
        default: false
     },
-    center: {
+    centerAlign: {
       type: Boolean,
       default: false
     }
@@ -115,7 +115,7 @@ export default {
     },
 
     rowShift () {
-      if (this.center) {
+      if (this.centerAlign) {
         let contentWidth = this.list.length * this.cellWidth
         let rowShift = contentWidth < this.gridResponsiveWidth
           ? (this.gridResponsiveWidth - contentWidth) / 2
