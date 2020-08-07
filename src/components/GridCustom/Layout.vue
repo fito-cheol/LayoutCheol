@@ -194,15 +194,8 @@ export default {
       let startPointList = this.getStartPointList()
       let startPoint = startPointList[targetItemSort]
       
-      /*
-        Normalizing new grid position
-      */
-      gridPosition = Math.max(gridPosition, -1)
-      /*
-        If you remove this line you can drag items to positions that
-        are further than items array length
-      */
-      gridPosition = Math.min(gridPosition, startPointList[this.list.length - 1])
+      gridPosition = this.nomalizeGridPosition(gridPosition, startPointList)
+      
 
       
       // sort 의 값만 바꿔준다
@@ -272,6 +265,15 @@ export default {
         return Number(a.sort) > Number(b.sort) ? 1: -1
       })
 
+    },
+    nomalizeGridPosition(gridPosition, startPointList){
+      gridPosition = Math.max(gridPosition, -1)
+      /*
+        If you remove this line you can drag items to positions that
+        are further than items array length
+      */
+      gridPosition = Math.min(gridPosition, startPointList[this.list.length - 1])
+      return gridPosition
     },
     getStartPointList(){
       let accumulationList = []
