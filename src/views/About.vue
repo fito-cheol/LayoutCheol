@@ -3,7 +3,7 @@
     <layout
       :draggable="true"
       :sortable="true"
-      :items="newItems"
+      :items="items"
       :cellWidth="width"
       :cellHeight="height"
       >
@@ -14,6 +14,7 @@
     </layout>
   </div>
 </template>
+
 
 <script>
 // @ is an alias to /src
@@ -28,12 +29,7 @@ export default {
     return {
       width:100,
       height:100,
-      items: [
-        'a',
-        'b',
-        'c',
-      ],
-      newItems:[
+      items:[
         {content:'a', size:1},{content:'b',size:2},
         {content:'c',size:2},{content:'d',size:1},
         {content:'e',size:1},
