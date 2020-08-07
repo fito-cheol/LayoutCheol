@@ -201,9 +201,12 @@ export default {
       if (isDragChangePosition) {
         this.list = this.list.map(item => {
 
-          if (item.index === targetItem.index) { 
+          const isDraggedItem = item.index === targetItem.index
+          if (isDraggedItem) { 
             let new_sort = 0
-            if (dragPosition== -1){
+            // 가장 앞쪽일 때
+            const isMostFront = dragPosition == -1
+            if (isMostFront){
               return {
                   ...item,
                   sort: new_sort,
@@ -211,13 +214,17 @@ export default {
             }
             for (let sort_index in startPositionList){
               sort_index = Number(sort_index)
-              // 마지막 인덱스가 넘어가면 제일 뒤
-              if (sort_index+1 == startPositionList.length){
+              
+              // 가장 뒤쪽 일 때
+              const isMostEnd = sort_index+1 == startPositionList.length
+              if (isMostEnd){
                 new_sort = sort_index;
                 break;
               }
-              // 상자 크기 내에 있으면 바꿔줌
-              if (startPositionList[sort_index] <= dragPosition && dragPosition < startPositionList[sort_index+1]){
+              
+              const currentStartPosition = startPositionList[sort_index] 
+              const nextStartPosition = startPositionList[sort_index+1]
+              if (currentStartPosition <= dragPosition && dragPosition < nextStartPosition){
                 new_sort = sort_index;
                 break;
               }
@@ -227,12 +234,12 @@ export default {
                   sort: new_sort,
                 }
           }
-
+          
           const { sort, size } = item
           let cellPosition = startPositionList[sort]
           
-          let isDraggedLeft = dragPosition < startPosition 
-          if (isDraggedLeft) { 
+          let isDraggedFront = dragPosition < startPosition 
+          if (isDraggedFront) { 
             // 사이즈가 2면 cellPosition >= position 가 아니라 cellPosition+1 >= position이 되어야한다
             if (cellPosition <= startPosition && cellPosition + size -1 >= dragPosition) {
               
@@ -242,8 +249,8 @@ export default {
               }
             }
           }
-          let isDraggedRight = dragPosition > startPosition  
-          if (isDraggedRight) {
+          let isDraggedBack = dragPosition > startPosition  
+          if (isDraggedBack) {
             if (cellPosition > startPosition && cellPosition <= dragPosition) {
               return {
                 ...item,
@@ -257,7 +264,8 @@ export default {
 
         this.$emit('sort', this.wrapEvent())
       }
-      // sort 순서대로 다시 정렬을 해줘야한다
+      // sort 순서대로 다시 정렬을 해줘야 위치 계산에서 오류가 안생긴다 
+      // ex) getStartPositionList
       this.list.sort(function(a,b){
         return Number(a.sort) > Number(b.sort) ? 1: -1
       })
@@ -282,11 +290,11 @@ export default {
         let startCellRowNumber = Math.floor(position / cellCountPerRow)
         let endCellRowNumber = Math.floor((position + size - 1) / cellCountPerRow)
         let isCellExceedRow = startCellRowNumber != endCellRowNumber;
-        let emptyGridSize = isCellExceedRow ? cellCountPerRow - (position % cellCountPerRow): 0;
-        let addedGridSize = emptyGridSize + size
+        let emptyCellSize = isCellExceedRow ? cellCountPerRow - (position % cellCountPerRow): 0;
+        let addedCellSize = emptyCellSize + size
 
         startPositionList.push(position)
-        position += addedGridSize
+        position += addedCellSize
       }
 
       return startPositionList
