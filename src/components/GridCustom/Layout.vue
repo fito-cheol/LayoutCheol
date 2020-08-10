@@ -21,6 +21,8 @@
             :item="v.item"
             :index="v.index"
             :sort="v.sort"
+            :tag="v.tag"
+            :content="v.content"
             :remove="() => { removeItem(v) }">
       </slot>
     </GridItem>
@@ -84,6 +86,8 @@ export default {
             size: item.size,
             index: index,
             sort: index,
+            tag: item.tag,
+            content: item.content
           }
         })
       },
